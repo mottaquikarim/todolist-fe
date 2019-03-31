@@ -1,13 +1,41 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+
+import {getTodos, getUser} from './services/todosAPI';
 
 class App extends Component {
+  constructor(props) {
+    super(props)
+
+    this.state = {
+        currentUser: 1,
+        userEmail: null,
+        currentTodos: [],
+    }
+  }
+  componentDidMount() {
+    const u = getUser(this.state.currentUser)
+    const t = getTodos(this.state.currentUser)
+    Promise.all([u, t]).then(([userData, todos]) => {
+        this.setState({
+            userEmail: userData.data.email,
+            currentTodos: todos.data,
+        })
+    })
+  }
   render() {
+    let header = <h1>Loading...</h1>;
+    if (this.state.userEmail) {
+        header = <h1>{this.state.userEmail}</h1>
+    }
     return (
       <div className="App">
+        {header}
+        <ul>
+        {this.state.currentTodos.map((todo, i)  => {
+            return <li key={i}>{todo.todo}</li>
+        })}
+        </ul>
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
           <p>
             Edit <code>src/App.js</code> and save to reload.
           </p>
